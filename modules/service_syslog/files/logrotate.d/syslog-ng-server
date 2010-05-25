@@ -1,0 +1,14 @@
+# WARNING: This file is managed by Puppet. Do NOT make local changes.
+
+/usr/local/syslog/*/exim/*.log /usr/local/syslog/*/apache/*_log {
+    monthly
+    dateext
+    rotate 12
+    compress
+    missingok
+    notifempty
+    sharedscripts
+    postrotate
+        /etc/init.d/syslog-ng reload > /dev/null 2>&1 || true
+    endscript
+}

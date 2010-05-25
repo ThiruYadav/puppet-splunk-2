@@ -1,0 +1,16 @@
+<%= puppet_warning %>
+destination d_remote {
+    tcp(
+        "<%= syslog_server -%>"
+        port(<%= syslog_port -%>)
+        tls(
+            ca_dir("/etc/ssl/syslog-ng")
+        )
+    );
+};
+
+# TODO: Do we want to log everything?
+#log {
+#    source(src);
+#    destination(d_remote);
+#};

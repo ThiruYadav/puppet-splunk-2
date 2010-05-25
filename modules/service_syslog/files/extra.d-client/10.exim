@@ -1,0 +1,32 @@
+# WARNING: This file is managed by Puppet. Do NOT make local changes.
+
+source s_exim-main {
+    file(
+        "/var/log/exim/exim_main.log"
+        flags(no-parse)
+        follow_freq(1)
+        program_override("exim-main")
+    );
+};
+source s_exim-reject {
+    file(
+        "/var/log/exim/exim_reject.log"
+        flags(no-parse)
+        follow_freq(1)
+        program_override("exim-reject")
+    );
+};
+source s_exim-panic {
+    file(
+        "/var/log/exim/exim_panic.log"
+        flags(no-parse)
+        follow_freq(1)
+        program_override("exim-panic")
+    );
+};
+log {
+    source(s_exim-main);
+    source(s_exim-reject);
+    source(s_exim-panic);
+    destination(d_remote);
+};

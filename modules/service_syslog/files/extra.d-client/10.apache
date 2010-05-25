@@ -1,0 +1,32 @@
+# WARNING: This file is managed by Puppet. Do NOT make local changes.
+
+parser p_apache-error {
+    csv-parser(
+        columns(
+            "APACHE.t",
+            "APACHE.Level",
+            "APACHE.r",
+            "APACHE.MSG"
+        )
+        flags(escape-double-char,strip-whitespace,greedy)
+        delimiters(" ")
+        quote-pairs('""[]')
+    );
+};
+
+# Apache's ErrorLog doesn't have any LogFormat equiv. To identify which vhost
+# an error has come from we need to extract the vhost name from the log's
+# filename. Puts some trust in the filename being correctly formatted.
+rewrite r_apache-error {
+    subst("^\/.*\/", "", value("FILE_NAME"));
+    subst("-error_log$", "", value("FILE_NAME"));
+    subst("^", "$FILE_NAME ", value("MESSAGE"));
+};
+
+# Don't send any Apache access events that don't begin with a vhost name.
+filter f_apache-access {
+    not match(
+        "^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3} "
+        value("MESSAGE")
+    );
+};

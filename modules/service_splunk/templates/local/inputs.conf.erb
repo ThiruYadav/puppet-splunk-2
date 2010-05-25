@@ -1,0 +1,30 @@
+[default]
+host = <%= hostname %>
+
+[monitor:///usr/local/syslog/*/apache/*-access_log]
+disabled = false
+followTail = 0
+host =
+host_segment = 4
+sourcetype = apache_access_vhost
+
+[monitor:///usr/local/syslog/*/apache/*-error_log]
+disabled = false
+followTail = 0
+host =
+host_segment = 4
+sourcetype = apache_error_vhost
+
+[monitor:///usr/local/syslog/*/exim/exim_main.log]
+disabled = false
+followTail = 0
+host =
+host_segment = 4
+sourcetype = exim_main
+
+[monitor:///usr/local/syslog/*/exim/exim_reject.log]
+disabled = false
+followTail = 0
+host =
+host_segment = 4
+sourcetype = exim_reject

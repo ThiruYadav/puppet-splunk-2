@@ -1,0 +1,40 @@
+<% puppet_warning %>
+source s_remote {
+    tcp(
+        port(<%= syslog_port -%>)
+        keep-alive(yes)
+        max_connections(100)
+        use_fqdn(yes)
+        tls(
+            cert_file("/etc/ssl/syslog-ng/server.crt")
+            key_file("/etc/ssl/syslog-ng/server.key")
+            peer_verify(optional-untrusted)
+        )
+    );
+};
+
+destination d_remote-all {
+    file(
+        "/usr/local/syslog/$HOST_FROM/all"
+        owner(root)
+        group(root)
+        perm(0600)
+        dir_perm(0700)
+        create_dirs(yes)
+    );
+};
+
+filter f_remote-all {
+    not program("exim-*") and
+    not program ("apache-*");
+};
+
+log {
+    source(s_remote);
+    filter(f_remote-all);
+    destination(d_remote-all);
+};
+
+template t_raw {
+    template("$MSG\n");
+};

@@ -1,0 +1,28 @@
+# WARNING: This file is managed by Puppet. Do NOT make local changes.
+
+server {
+    listen      443;
+    server_name <%= fqdn -%>;
+
+    root        /var/empty;
+    access_log  /var/log/nginx/<%= fqdn -%>-access_log main;
+    error_log   /var/log/nginx/<%= fqdn -%>-error_log info;
+
+    ssl                 on;
+    ssl_verify_client   on;
+    ssl_verify_depth    <%= splunk_ssl_depth -%>;
+    ssl_session_timeout 5m;
+
+    ssl_certificate         /etc/ssl/nginx/<%= fqdn -%>.crt;
+    ssl_certificate_key     /etc/ssl/nginx/<%= fqdn -%>.key;
+    ssl_client_certificate  /etc/ssl/nginx/ca/<%= splunk_ssl_ca -%>.crt;
+    #ssl_crl                 /etc/ssl/nginx/ca/<%= splunk_ssl_ca -%>.crl;
+
+    location / {
+        proxy_pass  http://127.0.0.1:8000/;
+
+        if ( $ssl_client_s_dn !~ "<%= splunk_ssl_var -%>=(<% splunk_ssl_users.each_with_index do |ssl_user, i| -%><% if i != 0 -%>|<% end -%><%= ssl_user -%><% end -%>)" ) {
+            return 403;
+        }
+    }
+}

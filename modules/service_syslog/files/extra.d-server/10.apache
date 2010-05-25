@@ -1,0 +1,79 @@
+# WARNING: This file is managed by Puppet. Do NOT make local changes.
+
+# Parse logs so that we can extract the vhost name.
+parser p_apache-access {
+    csv-parser(
+        columns(
+            "APACHE.v",
+            "APACHE.h",
+            "APACHE.l",
+            "APACHE.Email",
+            "APACHE.t",
+            "APACHE.r",
+            "APACHE.s",
+            "APACHE.b",
+            "APACHE.Referer",
+            "APACHE.UserAgent"
+        )
+        flags(escape-double-char,strip-whitespace)
+        delimiters(" ")
+        quote-pairs('""[]')
+    );
+};
+parser p_apache-error {
+    csv-parser(
+        columns(
+            "APACHE.v",
+            "APACHE.t",
+            "APACHE.Level",
+            "APACHE.r",
+            "APACHE.MSG"
+        )
+        flags(escape-double-char,strip-whitespace,greedy)
+        delimiters(" ")
+        quote-pairs('""[]')
+    );
+};
+
+destination d_apache-access {
+        file(
+            "/usr/local/syslog/$HOST_FROM/apache/${APACHE.v}-access_log"
+            owner(root)
+            group(root)
+            perm(0600)
+            dir_perm(0700)
+            create_dirs(yes)
+            template("$MSG\n")
+    );
+};
+destination d_apache-error {
+        file(
+            "/usr/local/syslog/$HOST_FROM/apache/${APACHE.v}-error_log"
+            owner(root)
+            group(root)
+            perm(0600)
+            dir_perm(0700)
+            create_dirs(yes)
+            template("$MSG\n")
+    );
+};
+
+filter f_apache-access {
+    program("apache-access");
+};
+filter f_apache-error {
+    program("apache-error");
+};
+
+log {
+    source(s_remote);
+    parser(p_apache-access);
+    filter(f_apache-access);
+    destination(d_apache-access);
+};
+log {
+    source(s_remote);
+    parser(p_apache-error);
+    filter(f_apache-error);
+    destination(d_apache-error);
+};

@@ -1,0 +1,61 @@
+# WARNING: This file is managed by Puppet. Do NOT make local changes.
+
+destination d_exim-main {
+        file(
+            "/usr/local/syslog/$HOST_FROM/exim/exim_main.log"
+            owner(root)
+            group(root)
+            perm(0600)
+            dir_perm(0700)
+            create_dirs(yes)
+            template(t_raw)
+    );
+};
+destination d_exim-reject {
+        file(
+            "/usr/local/syslog/$HOST_FROM/exim/exim_reject.log"
+            owner(root)
+            group(root)
+            perm(0600)
+            dir_perm(0700)
+            create_dirs(yes)
+            template(t_raw)
+    );
+};
+destination d_exim-panic {
+        file(
+            "/usr/local/syslog/$HOST_FROM/apache/exim_panic.log"
+            owner(root)
+            group(root)
+            perm(0600)
+            dir_perm(0700)
+            create_dirs(yes)
+            template(t_raw)
+    );
+};
+
+filter f_exim-main {
+    program("exim-main");
+};
+filter f_exim-reject {
+    program("exim-reject");
+};
+filter f_exim-panic {
+    program("exim-panic");
+};
+
+log {
+    source(s_remote);
+    filter(f_exim-main);
+    destination(d_exim-main);
+};
+log {
+    source(s_remote);
+    filter(f_exim-reject);
+    destination(d_exim-reject);
+};
+log {
+    source(s_remote);
+    filter(f_exim-panic);
+    destination(d_exim-panic);
+};
